@@ -28,7 +28,7 @@
         become_user: ubuntu
         ansible.builtin.copy:
           dest: /home/ubuntu/.ssh/id_rsa
-          content: "{{ lookup('env', 'REPO_SSH_KEY')}}"
+          content: "{{ lookup('env', 'GH_SSH_KEY')}}"
           mode: '0600'
 
       - name: Add GitHub.com to known_hosts for ubuntu
@@ -52,7 +52,7 @@
         become_user: ubuntu
         copy:
           dest: /home/ubuntu/.ssh/id_rsa
-          content: "{{ lookup('env', 'REPO_SSH_KEY') }}"
+          content: "{{ lookup('env', 'GH_SSH_KEY') }}"
           mode: '0600'
 
       - name: Ensure /opt/todo-app exists and is owned by ubuntu
@@ -65,19 +65,12 @@
           mode: '0755'
 
       - name: Clone or update private todo-app repo via SSH
-        become: true
-        become_user: ubuntu
-        shell: |
-            if [ -d /opt/todo-app/.git ]; then
-              cd /opt/todo-app && \
-              GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no' \
-                git pull
-            else
-              GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no' \
-                git clone git@github.com:Muhammad-Rabi693/todo-app.git /opt/todo-app
-            fi
-        args:
-            executable: /bin/bash
+        git:
+          repo: git@github.com:Muhammad-Rabi693/todo-app.git
+          dest: /opt/todo-app
+          version: main
+          key_file: /home/ubuntu/.ssh/id_rsa
+          accept_hostkey: yes
 
       - name: Wait for cloud-init to finish
         wait_for:
