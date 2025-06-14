@@ -65,12 +65,19 @@
           mode: '0755'
 
       - name: Clone or update private todo-app repo via SSH
-        git:
-          repo: git@github.com:Muhammad-Rabi693/todo-app.git
-          dest: /opt/todo-app
-          version: main
-          key_file: /home/ubuntu/.ssh/id_rsa
-          accept_hostkey: yes
+        become: true
+        become_user: ubuntu
+        shell: |
+            if [ -d /opt/todo-app/.git ]; then
+              cd /opt/todo-app && \
+              GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no' \
+                git pull
+            else
+              GIT_SSH_COMMAND='ssh -i /home/ubuntu/.ssh/id_rsa -o StrictHostKeyChecking=no' \
+                git clone git@github.com:Muhammad-Rabi693/todo-app.git /opt/todo-app
+            fi
+        args:
+            executable: /bin/bash
 
       - name: Wait for cloud-init to finish
         wait_for:
