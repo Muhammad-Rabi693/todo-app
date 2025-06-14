@@ -102,7 +102,7 @@ jobs:
                   mkdir -p ansible
                   cat > ansible/inventory.ini <<EOF
                   [swarm]
-                  ${{ needs.terraform.outputs.manager_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
+                  ${{ needs.terraform.outputs.manager_ip }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/swarm_key
                   EOF
 
             - name: Install Ansible & plugin
@@ -115,7 +115,7 @@ jobs:
               env:
                   GHCR_USER: ${{ github.repository_owner }}
                   GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  REPO_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+                  REPO_SSH_KEY: ${{ secrets.GH_SSH_KEY }}
               run: |
                   ansible-playbook \
                     -i ansible/inventory.ini \
